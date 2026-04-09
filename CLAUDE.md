@@ -11,6 +11,7 @@
 - English only
 - Implement tasks one by one in order, dont proceed to next if there are pending ones. Feel free to add, update and update task status if needed.
 - Always use caveman skill
+- Always try to use appropriate agent
 
 
 ## Index: Documentation Files
