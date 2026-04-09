@@ -1,0 +1,28 @@
+// Global styles
+@use 'tokens';
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-family: var(--fb-font-base);
+  color: var(--fb-text);
+  background: var(--fb-bg);
+  -webkit-font-smoothing: antialiased;
+}
+
+a {
+  color: var(--fb-primary);
+  text-decoration: none;
+
+  &:hover {
+    color: var(--fb-primary-hover);
+  }
+}
+
+#app {
+  min-height: 100vh;
+}

@@ -1,0 +1,83 @@
+services:
+
+  # ─── Application (Nginx + PHP-FPM + Vue HMR) ────────────────────────────
+  app:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+      target: final
+    ports:
+      - "80:80"
+      - "5173:5173"     # Vite HMR port
+    volumes:
+      # Hot reload: mount source dirs (override built files in container)
+      - ./cms:/var/www/cms-src:ro
+      - ./api:/var/www/api
+      - ./renderer:/var/www/renderer-src:ro
+      # Laravel storage persistence
+      - api-storage:/var/www/api/storage
+    env_file:
+      - .env.api
+    environment:
+      APP_ENV: local
+      APP_DEBUG: "true"
+    depends_on:
+      mysql:
+        condition: service_healthy
+    networks:
+      - formbuilder
+
+  # ─── CMS Vite dev server (hot reload) ───────────────────────────────────
+  cms-dev:
+    image: node:22-alpine
+    working_dir: /app
+    command: sh -c "npm install && npm run dev"
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./cms:/app
+    env_file:
+      - .env.cms
+    environment:
+      VITE_API_BASE_URL: http://localhost/api
+    networks:
+      - formbuilder
+
+  # ─── MySQL ──────────────────────────────────────────────────────────────
+  mysql:
+    image: mysql:8.0
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: formbuilder
+      MYSQL_USER: formbuilder
+      MYSQL_PASSWORD: secret
+    volumes:
+      - mysql-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "formbuilder", "-psecret"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    networks:
+      - formbuilder
+
+  # ─── Redis (optional — enable with: docker compose --profile redis up) ──
+  redis:
+    image: redis:7-alpine
+    profiles:
+      - redis
+    ports:
+      - "6379:6379"
+    command: redis-server --save "" --appendonly no
+    networks:
+      - formbuilder
+
+volumes:
+  mysql-data:
+  api-storage:
+
+networks:
+  formbuilder:
+    driver: bridge

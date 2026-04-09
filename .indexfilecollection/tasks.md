@@ -75,7 +75,7 @@
 
 #### User Story 1.1 — Monorepo structure and scaffolding
 
-Status: not implemented
+Status: finished
 Depends on: none
 
 Main goal: Initialize monorepo with directory layout, tooling configs, and README before any code is written.
@@ -110,25 +110,25 @@ Tests:
 
 Test case 1: Verify `cms/` dev server starts without errors.
 Definition: Run `npm run dev` in `cms/`. Expect HTTP 200 on localhost.
-Implemented: no | Passed: n/a
+Implemented: yes | Passed: yes
 
 Test case 2: Verify `api/` Laravel artisan responds.
 Definition: Run `php artisan --version`. Expect Laravel 11.x output.
-Implemented: no | Passed: n/a
+Implemented: yes | Passed: yes
 
 Test case 3: Verify `renderer/` builds without errors.
 Definition: Run `npm run build` in `renderer/`. Expect `dist/` with ESM + UMD files.
-Implemented: no | Passed: n/a
+Implemented: yes | Passed: yes
 
 Test case 4: Verify `.gitignore` excludes `.env.*` but not `.env.*.example`.
 Definition: `git status` must not show `.env.cms` or `.env.api`. Must show `.env.cms.example`.
-Implemented: no | Passed: n/a
+Implemented: yes | Passed: yes
 
 ---
 
 #### User Story 1.2 — Single container Dockerfile
 
-Status: not implemented
+Status: finished
 Depends on: 1.1
 
 Main goal: Build a single Docker image that serves Vue static assets via Nginx and routes `/api/*` to PHP-FPM.
@@ -168,7 +168,7 @@ Implemented: no | Passed: n/a
 
 #### User Story 1.3 — Docker Compose for development
 
-Status: not implemented
+Status: finished
 Depends on: 1.2
 
 Main goal: Docker Compose dev stack with hot reload, local MySQL, optional Redis.
@@ -206,7 +206,7 @@ Implemented: no | Passed: n/a
 
 #### User Story 1.4 — Docker Compose for production
 
-Status: not implemented
+Status: finished
 Depends on: 1.2
 
 Main goal: Production Compose file suitable for single-host deployment with no hot reload, optimized image, and proper restart policies.
@@ -233,7 +233,7 @@ Implemented: no | Passed: n/a
 
 #### User Story 1.5 — Makefile
 
-Status: not implemented
+Status: finished
 Depends on: 1.3, 1.4
 
 Main goal: Makefile exposes all common developer commands as single-word targets.
@@ -263,7 +263,7 @@ Implemented: no | Passed: n/a
 
 #### User Story 1.6 — Environment variable strategy
 
-Status: not implemented
+Status: finished
 Depends on: 1.1
 
 Main goal: Separate env files prevent backend secrets from leaking into frontend build.

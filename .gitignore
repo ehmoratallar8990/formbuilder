@@ -1,0 +1,38 @@
+# Environment secrets — NEVER commit these
+.env.cms
+.env.api
+.env
+.env.local
+
+# Dependencies
+node_modules/
+vendor/
+
+# Build outputs
+cms/dist/
+renderer/dist/
+docs/.vitepress/dist/
+docs/.vitepress/cache/
+
+# Laravel
+api/storage/logs/*.log
+api/storage/app/public/
+api/.env
+api/.env.*
+!api/.env.example
+
+# Logs
+*.log
+npm-debug.log*
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.idea/
+*.swp
+*.swo
+
+# Docker volumes (local overrides)
+docker/data/

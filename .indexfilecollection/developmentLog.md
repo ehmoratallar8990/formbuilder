@@ -71,3 +71,49 @@ Start with **Epic 1** tasks in order: 1.1.a → 1.1.b → 1.1.c → 1.1.d → 1.
 - Target PHP hosting: any constraints on PHP-FPM versions or extensions?
 
 ---
+
+## [2026-04-09] — Phase: Implementation — Story 1.1: Monorepo scaffolding
+
+### What was done
+- `api/`: Laravel 11.51.0 installed via `composer create-project laravel/laravel:^11`
+- `cms/`: Vite 8.0.8 + Vue 3.5.32 created. Added vue-router 4, pinia 2, axios, sass. Updated `vite.config.js` with alias, SCSS additionalData, dev server proxy to `/api`. Replaced `style.css` with `src/assets/main.scss` + `src/assets/tokens.scss` (CSS custom props). Updated `App.vue` to `<router-view>`. Added `src/router/index.js`.
+- `renderer/`: Manual skeleton. `package.json` with lit 3, vite 8. `vite.config.js` library mode (es + umd + iife → `form-renderer.esm.js`, `.umd.cjs`, `.iife.js`). `src/index.js` public API. `src/components/FormRenderer.js` (Lit, light DOM default, all public API methods stubbed). `src/loader.js` (MutationObserver-based auto-inject). `src/engines/ConditionalFlowEngine.js` (pure DAG evaluator + cycle detection). `src/engines/ValidationEngine.js` (pure validation runner, all rule types).
+- `docs/`: VitePress skeleton. `package.json`, `.vitepress/config.js`, `index.md`.
+- Root: `.gitignore` (blocks `.env.api`, `.env.cms`, `vendor/`, `node_modules/`, build dirs). `.env.api.example` (backend vars, no VITE_ prefix). `.env.cms.example` (only `VITE_*` vars). `README.md`.
+
+### Decisions made
+- A1 confirmed: Laravel 11 (used successfully)
+- `npm create vite` auto-completed in background — Vite 8 confirmed automatically
+- Renderer: chose `umd` as third format (alongside es + iife) for compatibility. Tasks.md said "UMD+ESM" in AC.
+- `ConditionalFlowEngine` AND `ValidationEngine` built now as skeleton — they're required by both renderer (8.2) and CMS previewer (6.9). Shared code avoids duplication.
+
+### All tests passed
+- `php artisan --version` → Laravel 11.51.0 ✓
+- `npm run build` (renderer) → ESM + UMD + IIFE produced ✓
+- `npm run build` (CMS) → built in 504ms, no errors ✓
+- `.gitignore` test: `.env.api`/`.env.cms` excluded; examples visible ✓
+
+### Next
+Story 1.2: Single container Dockerfile (multi-stage: node-cms, node-renderer, composer, nginx+php-fpm).
+
+---
+
+## [2026-04-09] — Phase: Implementation — Stories 1.2–1.6: Docker, Makefile, Env
+
+### What was done
+- **Story 1.2**: `docker/Dockerfile` — 4-stage multi-stage build (node-cms-build, node-renderer-build, composer-build, final php:8.2-fpm-alpine+nginx). `docker/nginx.conf` — Nginx serves Vue on `/`, proxies `/api/` to php-fpm:9000, serves renderer at `/assets/renderer/`, gzip enabled, security headers. `docker/supervisord.conf` — manages nginx+php-fpm as single-container processes. `docker/php/php.ini` + `php-fpm.conf`. Laravel 11 does NOT have `routes/api.php` by default — ran `php artisan install:api` (installs Sanctum, creates file). Added `GET /api/health` route returning `{"status":"ok"}`. Verified with `php artisan route:list`.
+- **Story 1.3**: `docker-compose.dev.yml` — app (with volume mounts), cms-dev (Vite HMR), mysql:8.0 (named volume, healthcheck), redis:7-alpine (profile:redis). Vite already configured with `host:true`, `port:5173`, `hmr:true`.
+- **Story 1.4**: `docker-compose.prod.yml` — app (pre-built image, no volume mounts), mysql, redis (profile). All services `restart: unless-stopped`.
+- **Story 1.5**: `Makefile` — all required targets: help, setup, install, dev, dev-redis, stop, logs, build, prod, prod-redis, migrate, migrate-rollback, seed, test, test-php, lint, shell, redis-flush, clean, docs-dev, docs-build. `make help` and `make setup` tested and passing.
+- **Story 1.6**: `.env.api.example` (backend-only vars, no VITE_ prefix) and `.env.cms.example` (only `VITE_*` vars) created in 1.1. README documents secret separation. Dockerfile CMS build stage uses ARG not file mount for frontend vars.
+
+### Decisions made
+- Laravel 11 note: `routes/api.php` doesn't exist until `php artisan install:api` is run. This also installs Sanctum. Document for team.
+- CMS Vite frontend vars injected as Docker ARG at build time (not from .env.api) — security-correct approach.
+- Single container: supervisor manages nginx + php-fpm processes.
+- `cms-dev` is a separate service in dev compose (runs Vite HMR), while `app` serves API only in dev (no Vue static needed during dev).
+
+### Next
+Epic 2: Database schema and migrations. Start with Story 2.1 (migration tooling), then 2.2 (users/roles schema).
+
+---

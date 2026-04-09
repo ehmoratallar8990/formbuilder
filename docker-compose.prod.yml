@@ -1,0 +1,64 @@
+services:
+
+  # ─── Application ────────────────────────────────────────────────────────
+  app:
+    image: formbuilder:latest    # Pre-built via: docker build -f docker/Dockerfile -t formbuilder:latest .
+    ports:
+      - "80:80"
+    volumes:
+      - api-storage:/var/www/api/storage
+    env_file:
+      - .env.api
+    environment:
+      APP_ENV: production
+      APP_DEBUG: "false"
+    restart: unless-stopped
+    depends_on:
+      mysql:
+        condition: service_healthy
+    networks:
+      - formbuilder
+
+  # ─── MySQL ──────────────────────────────────────────────────────────────
+  mysql:
+    image: mysql:8.0
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-changeme}
+      MYSQL_DATABASE: ${DB_DATABASE:-formbuilder}
+      MYSQL_USER: ${DB_USERNAME:-formbuilder}
+      MYSQL_PASSWORD: ${DB_PASSWORD:-secret}
+    volumes:
+      - mysql-data:/var/lib/mysql
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "${DB_USERNAME:-formbuilder}", "-p${DB_PASSWORD:-secret}"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+    networks:
+      - formbuilder
+
+  # ─── Redis (optional — enable with: docker compose --profile redis up) ──
+  redis:
+    image: redis:7-alpine
+    profiles:
+      - redis
+    ports:
+      - "6379:6379"
+    command: redis-server --save 60 1 --loglevel warning
+    volumes:
+      - redis-data:/data
+    restart: unless-stopped
+    networks:
+      - formbuilder
+
+volumes:
+  mysql-data:
+  redis-data:
+  api-storage:
+
+networks:
+  formbuilder:
+    driver: bridge

@@ -1,0 +1,41 @@
+// CSS custom property tokens — all --fb-* vars defined here
+// Import: @use "@/assets/tokens" as *;   (via vite.config.js additionalData)
+
+:root {
+  // Brand colors
+  --fb-primary: #2563eb;
+  --fb-primary-hover: #1d4ed8;
+  --fb-secondary: #7c3aed;
+  --fb-error: #dc2626;
+  --fb-success: #16a34a;
+  --fb-warning: #d97706;
+
+  // Neutrals
+  --fb-bg: #ffffff;
+  --fb-bg-secondary: #f8fafc;
+  --fb-bg-tertiary: #f1f5f9;
+  --fb-text: #0f172a;
+  --fb-text-muted: #64748b;
+  --fb-border: #e2e8f0;
+  --fb-border-strong: #cbd5e1;
+
+  // Spacing
+  --fb-radius-sm: 4px;
+  --fb-radius-md: 8px;
+  --fb-radius-lg: 12px;
+  --fb-radius-full: 9999px;
+
+  // Typography
+  --fb-font-base: 'system-ui', sans-serif;
+  --fb-font-mono: 'ui-monospace', monospace;
+}
+
+[data-theme="dark"] {
+  --fb-bg: #0f172a;
+  --fb-bg-secondary: #1e293b;
+  --fb-bg-tertiary: #334155;
+  --fb-text: #f8fafc;
+  --fb-text-muted: #94a3b8;
+  --fb-border: #334155;
+  --fb-border-strong: #475569;
+}
